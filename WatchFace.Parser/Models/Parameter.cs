@@ -95,7 +95,7 @@ namespace WatchFace.Parser.Models
             var flags = (ParameterFlags) (rawId & 0x7);
 
             if (id == 0)
-                throw new ArgumentException("Parameter with zero Id is invalid.");
+                throw new ArgumentException("参数 Id 不能为0");
 
             var value = ReadValue(fileStream);
             if (flags.HasFlag(ParameterFlags.HasChildren))
@@ -123,7 +123,7 @@ namespace WatchFace.Parser.Models
             while ((currentByte & 0x80) > 0)
             {
                 if (bytesLength > 9)
-                    throw new ArgumentException("Value of the parameter too long.");
+                    throw new ArgumentException("参数值过长");
                 value = value | ((long) (currentByte & 0x7f) << offset);
                 offset += 7;
                 currentByte = ReadByte(fileStream);
@@ -137,7 +137,7 @@ namespace WatchFace.Parser.Models
         {
             var currentByte = stream.ReadByte();
             if (currentByte == -1)
-                throw new ArgumentException("Reading buffer is empty.");
+                throw new ArgumentException("读取缓存为空");
             return (byte) currentByte;
         }
 

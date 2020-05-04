@@ -13,7 +13,7 @@ namespace WatchFace.Parser.Utils
         public static List<Parameter> Build<T>(T serializable, string path = "")
         {
             var result = new List<Parameter>();
-            var currentType = typeof(T);
+            _ = typeof(T);
 
             foreach (var kv in ElementsHelper.SortedProperties<T>())
             {
@@ -64,12 +64,13 @@ namespace WatchFace.Parser.Utils
                         result.Add(new Parameter(id, innerParameters));
                     }
                     else
-                        Logger.Trace("{0} '{1}': Skipped because of empty", currentPath, propertyInfo.Name);
+                        Logger.Trace("{0} '{1}': 为空，跳过", currentPath, propertyInfo.Name);
                 }
             }
 
             return result;
         }
+
 
         public static T Parse<T>(List<Parameter> descriptor, string path = "") where T : new()
         {
@@ -79,14 +80,32 @@ namespace WatchFace.Parser.Utils
 
             var thisMethod = typeof(ParametersConverter).GetMethod(nameof(Parse));
 
+            if (IgnoreError.GetDatai() == false)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("警告：道路千万条，安全第一条!");
+                Console.ResetColor();
+                Console.WriteLine("===============================");
+                Console.WriteLine("是否忽略异常？（N/Y）默认否");
+                Console.WriteLine("");
+                Console.WriteLine("输入 Y ==>暴力解包,无视错误<=");
+                Console.WriteLine("===============================");
+
+                string i = Console.ReadLine();
+
+                if (i == "Y") IgnoreError.Change(true);
+            }
+
             foreach (var parameter in descriptor)
             {
                 var currentPath = string.IsNullOrEmpty(path)
                     ? parameter.Id.ToString()
                     : string.Concat(path, '.', parameter.Id.ToString());
-                if (!properties.ContainsKey(parameter.Id))
-                    throw new ArgumentException($"Parameter {parameter.Id} isn't supported for {currentType.Name}");
-
+                if (IgnoreError.GetDataIgnore() == false)
+                {
+                    if (!properties.ContainsKey(parameter.Id))
+                        throw new ArgumentException($"参数 {parameter.Id} 不被 {currentType.Name} 支持");
+                }
                 var propertyInfo = properties[parameter.Id];
                 var propertyType = propertyInfo.PropertyType;
 
@@ -99,10 +118,10 @@ namespace WatchFace.Parser.Utils
                     dynamic propertyValue = propertyInfo.GetValue(result, null);
 
                     if (propertyType.IsGenericType && propertyValue != null)
-                        throw new ArgumentException($"Parameter {parameter.Id} is already set for {currentType.Name}");
+                        throw new ArgumentException($"参数 {parameter.Id} 已经为 {currentType.Name} 设置");
 
                     if (!propertyType.IsGenericType && propertyType == typeof(long) && propertyValue != 0)
-                        throw new ArgumentException($"Parameter {parameter.Id} is already set for {currentType.Name}");
+                        throw new ArgumentException($"参数 {parameter.Id} 已经为 {currentType.Name} 设置");
 
                     if (propertyType == typeof(TextAlignment))
                         propertyInfo.SetValue(result, (TextAlignment) parameter.Value, null);
@@ -130,7 +149,7 @@ namespace WatchFace.Parser.Utils
                     }
                     catch (TargetInvocationException e)
                     {
-                        throw e.InnerException;
+                        if(IgnoreError.GetDataIgnore() == false) throw e.InnerException;
                     }
                 }
                 else
@@ -138,7 +157,7 @@ namespace WatchFace.Parser.Utils
                     Logger.Trace("{0} '{1}'", currentPath, propertyInfo.Name);
                     dynamic propertyValue = propertyInfo.GetValue(result, null);
                     if (propertyValue != null)
-                        throw new ArgumentException($"Parameter {parameter.Id} is already set for {currentType.Name}");
+                        throw new ArgumentException($"参数 {parameter.Id} 已经为 {currentType.Name} 设置");
 
                     try
                     {
@@ -148,7 +167,7 @@ namespace WatchFace.Parser.Utils
                     }
                     catch (TargetInvocationException e)
                     {
-                        throw e.InnerException;
+                        if(IgnoreError.GetDataIgnore() == false) throw e.InnerException;
                     }
                 }
             }

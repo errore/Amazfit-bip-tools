@@ -44,7 +44,7 @@ namespace Resources.Image
 
             if (_bitsPerPixel > 4)
                 throw new ArgumentException(
-                    $"The image has {_bitsPerPixel} bit/pixel and can't be packed for using on the watches. Looks like dithering works incorrectly on the image."
+                    $"图片有 {_bitsPerPixel} bit/像素，不能用作表盘，似乎图像不正确*( ￣皿￣)/#"
                 );
 
             _rowLengthInBytes = (ushort) Math.Ceiling(_width * _bitsPerPixel / 8.0);
@@ -58,7 +58,7 @@ namespace Resources.Image
 
         private void ExtractPalette()
         {
-            Logger.Trace("Extracting palette...");
+            Logger.Trace("提取调色板...");
 
             using (var context = _image.CreateUnsafeContext())
             {
@@ -70,7 +70,7 @@ namespace Resources.Image
 
                     if (color.A < 0x80 && _transparency == 0)
                     {
-                        Logger.Trace("Palette item {0}: R {1:X2}, G {2:X2}, B {3:X2}, Transaparent color",
+                        Logger.Trace("调色板元件 {0}: R {1:X2}, G {2:X2}, B {3:X2}, 透明颜色",
                             _palette.Count, color.R, color.G, color.B
                         );
                         _palette.Insert(0, color);
@@ -78,7 +78,7 @@ namespace Resources.Image
                     }
                     else
                     {
-                        Logger.Trace("Palette item {0}: R {1:X2}, G {2:X2}, B {3:X2}",
+                        Logger.Trace("调色板元件 {0}: R {1:X2}, G {2:X2}, B {3:X2}",
                             _palette.Count, color.R, color.G, color.B
                         );
                         _palette.Add(color);
@@ -114,9 +114,9 @@ namespace Resources.Image
 
         private void WriteHeader()
         {
-            Logger.Trace("Writing image header...");
-            Logger.Trace("Width: {0}, Height: {1}, RowLength: {2}", _width, _height, _rowLengthInBytes);
-            Logger.Trace("BPP: {0}, PaletteColors: {1}, Transaparency: {2}",
+            Logger.Trace("写入图片头文件...");
+            Logger.Trace("宽: {0}, 高: {1}, 行长度: {2}", _width, _height, _rowLengthInBytes);
+            Logger.Trace("bit/像素: {0}, 色板颜色: {1}, 透明: {2}",
                 _bitsPerPixel, _paletteColors, _transparency
             );
 
@@ -130,7 +130,7 @@ namespace Resources.Image
 
         private void WritePalette()
         {
-            Logger.Trace("Writing palette...");
+            Logger.Trace("写入调色板...");
             foreach (var color in _palette)
             {
                 _writer.Write(color.R);
@@ -142,7 +142,7 @@ namespace Resources.Image
 
         private void WriteImage()
         {
-            Logger.Trace("Writing image...");
+            Logger.Trace("写入图像...");
 
             var paletteHash = new Dictionary<Color, byte>();
             byte i = 0;

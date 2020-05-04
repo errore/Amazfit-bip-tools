@@ -24,7 +24,7 @@ namespace Resources.Image
                     if (!isImageAltered)
                     {
                         Logger.Warn(
-                            "Dithering applied for an image. Resource in watch face will use only supported colors. You can't get back original image by unpacking watch face."
+                            "应用图像抖动。监视面板中的资源将仅使用支持的颜色。不能通过打开表盘来恢复原始图像。"
                         );
                         isImageAltered = true;
                     }

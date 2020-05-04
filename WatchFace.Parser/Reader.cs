@@ -27,28 +27,28 @@ namespace WatchFace.Parser
 
         public void Read()
         {
-            Logger.Trace("Reading header...");
+            Logger.Trace("阅读头文件...");
             var header = Header.ReadFrom(_stream);
-            Logger.Trace("Header was read:");
-            Logger.Trace("Signature: {0}, Unknown: {1}, ParametersSize: {2}, IsValid: {3}", header.Signature,
+            Logger.Trace("已读:");
+            Logger.Trace("已签名: {0}, 未知: {1}, 参数大小: {2}, 错误（非法）: {3}", header.Signature,
                 header.Unknown,
                 header.ParametersSize, header.IsValid);
             if (!header.IsValid) return;
 
-            Logger.Trace("Reading parameter offsets...");
+            Logger.Trace("读取偏移参数...");
             var parametersStream = StreamBlock(_stream, (int) header.ParametersSize);
-            Logger.Trace("Parameter offsets were read from file");
+            Logger.Trace("偏移参数已从文件读取");
 
-            Logger.Trace("Reading parameters descriptor...");
+            Logger.Trace("读取参数标识符...");
             var mainParam = Parameter.ReadFrom(parametersStream);
-            Logger.Trace("Parameters descriptor was read:");
+            Logger.Trace("参数标识符已读取:");
             var parametrsTableLength = mainParam.Children[0].Value;
             var imagesCount = mainParam.Children[1].Value;
-            Logger.Trace($"ParametrsTableLength: {parametrsTableLength}, ImagesCount: {imagesCount}");
+            Logger.Trace($"参数表长: {parametrsTableLength}, 图像数: {imagesCount}");
 
-            Logger.Trace("Reading parameters locations...");
+            Logger.Trace("读取位置参数...");
             var parametersLocations = Parameter.ReadList(parametersStream);
-            Logger.Trace("Watch face parameters locations were read:");
+            Logger.Trace("表盘位置参数读取已读取:");
 
             Parameters = ReadParameters(parametrsTableLength, parametersLocations);
             Resources = new Resources.Reader(_stream).Read((uint) imagesCount);
@@ -63,11 +63,11 @@ namespace WatchFace.Parser
             {
                 var descriptorOffset = prameterDescriptor.Children[0].Value;
                 var descriptorLength = prameterDescriptor.Children[1].Value;
-                Logger.Trace("Reading descriptor for parameter {0}", prameterDescriptor.Id);
-                Logger.Trace("Descriptor offset: {0}, Descriptor length: {1}", descriptorOffset, descriptorLength);
+                Logger.Trace("读取参数标识符 {0}", prameterDescriptor.Id);
+                Logger.Trace("标识符偏移: {0}, 标识符长度: {1}", descriptorOffset, descriptorLength);
                 parametersStream.Seek(descriptorOffset, SeekOrigin.Begin);
                 var descriptorStream = StreamBlock(parametersStream, (int) descriptorLength);
-                Logger.Trace("Parsing descriptor for parameter {0}...", prameterDescriptor.Id);
+                Logger.Trace("打包参数标识符 {0}...", prameterDescriptor.Id);
                 result.Add(new Parameter(prameterDescriptor.Id, Parameter.ReadList(descriptorStream)));
             }
             return result;

@@ -31,7 +31,7 @@ namespace Resources
                 if (resource != null) return resource;
             }
 
-            throw new FileNotFoundException($"File referenced by index {index} not found.");
+            throw new FileNotFoundException($"文件目录 {index} 未找到");
         }
 
         private static IResource TryLoadBitmap(string directory, string numericPart)
@@ -39,12 +39,12 @@ namespace Resources
             var fullFileName = Path.Combine(directory, numericPart + Models.Image.ResourceExtension);
             if (!File.Exists(fullFileName))
             {
-                Logger.Trace("File {0} doesn't exists.", fullFileName);
+                Logger.Trace("文件 {0} 不存在", fullFileName);
                 return null;
             }
 
             var image = (Bitmap) System.Drawing.Image.FromFile(fullFileName);
-            Logger.Trace("Image was loaded from file {0}", fullFileName);
+            Logger.Trace("图像已从 {0} 加载", fullFileName);
             var ditheredBitmap = ApplyDithering(image);
             return new Models.Image(ditheredBitmap);
         }
@@ -54,7 +54,7 @@ namespace Resources
             var fullFileName = Path.Combine(directory, numericPart + Blob.ResourceExtension);
             if (!File.Exists(fullFileName))
             {
-                Logger.Trace("File {0} doesn't exists.", fullFileName);
+                Logger.Trace("文件 {0} 不存在 (￣▽￣)”", fullFileName);
                 return null;
             }
 

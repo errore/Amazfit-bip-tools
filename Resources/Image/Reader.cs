@@ -28,42 +28,42 @@ namespace Resources.Image
         {
             var signature = _reader.ReadChars(4);
             if (signature[0] != 'B' || signature[1] != 'M')
-                throw new InvalidResourceException("Image signature doesn't match.");
+                throw new InvalidResourceException("图像签名不匹配");
 
             ReadHeader();
             if (_paletteColors > 256)
                 throw new InvalidResourceException(
-                    "Too many palette colors.");
+                    "色板颜色过多（>256）");
 
             if (_paletteColors > 0)
                 ReadPalette();
             else if (_bitsPerPixel == 8 || _bitsPerPixel == 16 || _bitsPerPixel == 24 || _bitsPerPixel == 32)
-                Logger.Trace("The image doesn't use a palette.");
+                Logger.Trace("图像未使用色板");
             else
                 throw new InvalidResourceException(
-                    "The image format is not supported. Please report the issue on https://bitbucket.org/valeronm/amazfitbiptools");
+                    "图片格式不支持，详情访问 https://bitbucket.org/valeronm/amazfitbiptools");
             return ReadImage();
         }
 
         private void ReadHeader()
         {
-            Logger.Trace("Reading image header...");
+            Logger.Trace("读取图像头文件...");
             _width = _reader.ReadUInt16();
             _height = _reader.ReadUInt16();
             _rowLengthInBytes = _reader.ReadUInt16();
             _bitsPerPixel = _reader.ReadUInt16();
             _paletteColors = _reader.ReadUInt16();
             _transparency = _reader.ReadUInt16() > 0;
-            Logger.Trace("Image header was read:");
-            Logger.Trace("Width: {0}, Height: {1}, RowLength: {2}", _width, _height, _rowLengthInBytes);
-            Logger.Trace("BPP: {0}, PaletteColors: {1}, Transaparency: {2}",
+            Logger.Trace("头文件已读：");
+            Logger.Trace("款: {0}, 高: {1}, 行长度: {2}", _width, _height, _rowLengthInBytes);
+            Logger.Trace("bit/像素: {0}, 色板颜色: {1}, 透明: {2}",
                 _bitsPerPixel, _paletteColors, _transparency
             );
         }
 
         private void ReadPalette()
         {
-            Logger.Trace("Reading palette...");
+            Logger.Trace("读取色板...");
             _palette = new Color[_paletteColors];
             for (var i = 0; i < _paletteColors; i++)
             {
@@ -72,13 +72,13 @@ namespace Resources.Image
                 var b = _reader.ReadByte();
                 var padding = _reader.ReadByte(); // always 0 maybe padding
 
-                if (padding != 0) Logger.Warn("Palette item {0} last byte is not zero: {1:X2}", i, padding);
+                if (padding != 0) Logger.Warn("色板元件 {0} 最后字节不为0: {1:X2}", i, padding);
 
                 var isColorValid = (r == 0 || r == 0xff) && (g == 0 || g == 0xff) && (b == 0 || b == 0xff);
                 if (isColorValid)
-                    Logger.Trace("Palette item {0}: R {1:X2}, G {2:X2}, B {3:X2}", i, r, g, b);
+                    Logger.Trace("色板元件 {0}: R {1:X2}, G {2:X2}, B {3:X2}", i, r, g, b);
                 else
-                    Logger.Warn("Palette item {0}: R {1:X2}, G {2:X2}, B {3:X2}, color isn't supported!", i, r, g, b);
+                    Logger.Warn("色板元件 {0}: R {1:X2}, G {2:X2}, B {3:X2}, 颜色不支持!", i, r, g, b);
 
                 var alpha = _transparency && i == 0 ? 0x00 : 0xff;
                 _palette[i] = Color.FromArgb(alpha, r, g, b);
@@ -92,7 +92,7 @@ namespace Resources.Image
             if (_bitsPerPixel == 16) return Read16BitImage();
             if (_bitsPerPixel == 24) return Read24BitImage();
             if (_bitsPerPixel == 32) return Read32BitImage();
-            throw new InvalidResourceException($"Unsupported bits per pixel value: {_bitsPerPixel}");
+            throw new InvalidResourceException($"不支持的像素比特（bit）值: {_bitsPerPixel}");
         }
 
         private Bitmap ReadPaletteImage()

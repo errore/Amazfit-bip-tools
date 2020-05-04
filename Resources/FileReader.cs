@@ -15,9 +15,9 @@ namespace Resources
             var binaryReader = new BinaryReader(stream);
 
             var signature = Encoding.ASCII.GetString(binaryReader.ReadBytes(5));
-            Logger.Trace("Resources signature was read:");
+            Logger.Trace("资源签名已读:");
             stream.Seek(0, SeekOrigin.Begin);
-            Logger.Trace("Signature: {0}", signature);
+            Logger.Trace("签名: {0}", signature);
 
             Header header;
             switch (signature) {
@@ -28,11 +28,11 @@ namespace Resources
                     header = NewHeader.ReadFrom(binaryReader);
                     break;
                 default:
-                    throw new ArgumentException($"Signature '{signature}' is no recognized.");
+                    throw new ArgumentException($"签名 '{signature}' 无法识别");
             }
 
-            Logger.Trace("Resources header was read:");
-            Logger.Trace("Version: {0}, ResourcesCount: {1}", header.Version, header.ResourcesCount);
+            Logger.Trace("资源头文件已读:");
+            Logger.Trace("版本: {0}, 资源计数: {1}", header.Version, header.ResourcesCount);
 
             return new FileDescriptor
             {

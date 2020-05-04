@@ -29,7 +29,7 @@ namespace WatchFace.Parser.Utils
 
         public void Process<T>(T serializable, string path = "")
         {
-            if (!string.IsNullOrEmpty(path)) Logger.Trace("Loading resources for {0} '{1}'", path, typeof(T).Name);
+            if (!string.IsNullOrEmpty(path)) Logger.Trace("正在为 {0} '{1}' 加载资源", path, typeof(T).Name);
 
             long? lastImageIndexValue = null;
 
@@ -51,7 +51,7 @@ namespace WatchFace.Parser.Utils
 
                 if (imagesCountAttribute != null && imageIndexAttribute != null)
                     throw new ArgumentException(
-                        $"Property {propertyInfo.Name} can't have both ParameterImageIndexAttribute and ParameterImagesCountAttribute"
+                        $"{propertyInfo.Name} 不能同时拥有 ParameterImageIndexAttribute 和 ParameterImagesCountAttribute"
                     );
 
                 if (propertyType == typeof(long) || propertyType.IsGenericType &&
@@ -71,7 +71,7 @@ namespace WatchFace.Parser.Utils
                     {
                         if (lastImageIndexValue == null)
                             throw new ArgumentException(
-                                $"Property {propertyInfo.Name} can't be processed because ImageIndex isn't present or it is zero"
+                                $"{propertyInfo.Name} 不能处理，因为 ImageIndex 不存在或为0"
                             );
 
                         var imagesCount = propertyType.IsGenericType
@@ -94,7 +94,7 @@ namespace WatchFace.Parser.Utils
                     else
                     {
                         throw new ArgumentException(
-                            $"Property {propertyInfo.Name} with type {propertyType.Name} can't have ParameterImageIndexAttribute or ParameterImagesCountAttribute"
+                            $"{propertyInfo.Name} 类型 {propertyType.Name} 不能拥有 ParameterImageIndexAttribute 或 ParameterImagesCountAttribute"
                         );
                     }
                 }
@@ -107,7 +107,7 @@ namespace WatchFace.Parser.Utils
                 return _mapping[index];
 
             var newImageIndex = Resources.Count;
-            Logger.Trace("Loading image {0}...", newImageIndex);
+            Logger.Trace("加载图像 {0}...", newImageIndex);
             var resource = ImageLoader.LoadResourceForNumber(_imagesDirectory, index);
             Resources.Add(resource);
             _mapping[index] = newImageIndex;

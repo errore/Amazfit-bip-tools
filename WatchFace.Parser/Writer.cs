@@ -23,18 +23,18 @@ namespace WatchFace.Parser
 
         public void Write(IList<Parameter> descriptor)
         {
-            Logger.Trace("Encoding parameters...");
+            Logger.Trace("编码中...");
             var encodedParameters = new Dictionary<byte, MemoryStream>(descriptor.Count);
             foreach (var parameter in descriptor)
             {
-                Logger.Trace("Parameter: {0}", parameter.Id);
+                Logger.Trace("参数: {0}", parameter.Id);
                 var memoryStream = new MemoryStream();
                 foreach (var child in parameter.Children)
                     child.Write(memoryStream);
                 encodedParameters[parameter.Id] = memoryStream;
             }
 
-            Logger.Trace("Encoding offsets and lengths...");
+            Logger.Trace("编码偏移和高度...");
             var parametersPositions = new List<Parameter>(descriptor.Count + 1);
             var offset = (long) 0;
             foreach (var encodedParameter in encodedParameters)
@@ -58,7 +58,7 @@ namespace WatchFace.Parser
             foreach (var parametersPosition in parametersPositions)
                 parametersPosition.Write(encodedParametersPositions);
 
-            Logger.Trace("Writing header...");
+            Logger.Trace("阅读头文件...");
             var header = new Header
             {
                 ParametersSize = (uint) encodedParametersPositions.Length,
@@ -66,18 +66,18 @@ namespace WatchFace.Parser
             };
             header.WriteTo(_stream);
 
-            Logger.Trace("Writing parameters offsets and lengths...");
+            Logger.Trace("写入偏移和高度...");
             encodedParametersPositions.Seek(0, SeekOrigin.Begin);
             encodedParametersPositions.WriteTo(_stream);
 
-            Logger.Trace("Writing parameters...");
+            Logger.Trace("写入参数...");
             foreach (var encodedParameter in encodedParameters)
             {
                 var stream = encodedParameter.Value;
                 stream.Seek(0, SeekOrigin.Begin);
                 stream.WriteTo(_stream);
             }
-            Logger.Trace("Writing images...");
+            Logger.Trace("写入镜像...");
             new Resources.Writer(_stream).Write(_images);
         }
     }

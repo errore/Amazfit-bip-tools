@@ -21,14 +21,14 @@ namespace Resources
         public void Write(FileDescriptor descriptor)
         {
             if (descriptor.Version == null)
-                throw new ArgumentException("Res file version required");
+                throw new ArgumentException("源文件版本：");
 
             if (descriptor.HasNewHeader)
                 WriteNewHeader(descriptor);
             else
                 WriteOldHeader(descriptor);
 
-            Logger.Trace("Writing images...");
+            Logger.Trace("写入镜像...");
             new Writer(_stream).Write(descriptor.Resources);
         }
 
@@ -39,8 +39,8 @@ namespace Resources
                 ResourcesCount = (uint)descriptor.Resources.Count,
                 Version = descriptor.Version.Value
             };
-            Logger.Trace("Writing resources header...");
-            Logger.Trace("Signature: {0}, Version: {1}, ResourcesCount: {2}",
+            Logger.Trace("写入头文件...");
+            Logger.Trace("已签名: {0}, 版本: {1}, 资源数目: {2}",
                 header.Signature, header.Version, header.ResourcesCount
             );
             header.WriteTo(_binaryWriter);
@@ -54,8 +54,8 @@ namespace Resources
                 Version = descriptor.Version.Value,
                 Unknown = descriptor.Unknown.Value
             };
-            Logger.Trace("Writing resources header...");
-            Logger.Trace("Signature: {0}, Version: {1}, ResourcesCount: {2}, Unknown: {3}",
+            Logger.Trace("写入头文件...");
+            Logger.Trace("已签名: {0}, 版本: {1}, 资源数目: {2}, 错误（未知: {3}）",
                 header.Signature, header.Version, header.ResourcesCount, header.Unknown
             );
             header.WriteTo(_binaryWriter);

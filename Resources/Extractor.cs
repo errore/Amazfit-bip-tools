@@ -24,7 +24,7 @@ namespace Resources
                 var numericPart = i.ToString().PadLeft(ImageLoader.NumericPartLength, '0');
 
                 var fileName = Path.Combine(outputDirectory, numericPart + resource.Extension);
-                Logger.Debug("Extracting {0}...", fileName);
+                Logger.Debug("提取中 {0}...", fileName);
 
                 using (var fileStream = File.OpenWrite(fileName))
                     resource.ExportTo(fileStream);

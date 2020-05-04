@@ -33,19 +33,19 @@ namespace WatchFace
             if (args.Length == 0 || args[0] == null)
             {
                 Console.WriteLine(
-                    "{0}.exe unpacks and packs Amazfit Bip downloadable watch faces and resource files.", AppName);
+                    "{0}.exe 可以用来打包解包您的米环资源包、表盘（Error_E翻译，原作者：Valeriy Nironov）", AppName);
                 Console.WriteLine();
-                Console.WriteLine("Usage examples:");
-                Console.WriteLine("  {0}.exe watchface.bin   - unpacks watchface images and config", AppName);
-                Console.WriteLine("  {0}.exe watchface.json  - packs config and referenced images to bin file",
+                Console.WriteLine("举几个栗子:");
+                Console.WriteLine("  {0}.exe watchface.bin   - 解包表盘配置和文件", AppName);
+                Console.WriteLine("  {0}.exe watchface.json  - 打包表盘（通过json），请勿导入资源包内json",
                     AppName);
-                Console.WriteLine("  {0}.exe mili_chaohu.res - unpacks resource file images", AppName);
-                Console.WriteLine("  {0}.exe mili_chaohu     - packs folder content to res file", AppName);
+                Console.WriteLine("  {0}.exe mili_chaohu.res - 解包资源包", AppName);
+                Console.WriteLine("  {0}.exe mili_chaohu     - 打包资源包（通过文件夹）", AppName);
                 return;
             }
 
             if (args.Length > 1)
-                Console.WriteLine("Multiple files unpacking.");
+                Console.WriteLine("混合文件解包");
 
             foreach (var inputFileName in args)
             {
@@ -53,13 +53,13 @@ namespace WatchFace
                 var isFile = File.Exists(inputFileName);
                 if (!isDirectory && !isFile)
                 {
-                    Console.WriteLine("File or directory '{0}' doesn't exists.", inputFileName);
+                    Console.WriteLine("文件或目录 '{0}' 不存在╯︿╰", inputFileName);
                     continue;
                 }
 
                 if (isDirectory)
                 {
-                    Console.WriteLine("Processing directory '{0}'", inputFileName);
+                    Console.WriteLine("处理目录 '{0}'", inputFileName);
                     try
                     {
                         PackResources(inputFileName);
@@ -72,7 +72,7 @@ namespace WatchFace
                     continue;
                 }
 
-                Console.WriteLine("Processing file '{0}'", inputFileName);
+                Console.WriteLine("处理文件 '{0}'", inputFileName);
                 var inputFileExtension = Path.GetExtension(inputFileName);
                 try
                 {
@@ -88,8 +88,8 @@ namespace WatchFace
                             UnpackResources(inputFileName);
                             break;
                         default:
-                            Console.WriteLine("The app doesn't support files with extension {0}.", inputFileExtension);
-                            Console.WriteLine("Only 'bin', 'res' and 'json' files are supported at this time.");
+                            Console.WriteLine("这是什么操作！？？不支持扩展名 {0}.", inputFileExtension);
+                            Console.WriteLine("令人窒息QwQ");
                             break;
                     }
                 }
@@ -108,7 +108,14 @@ namespace WatchFace
             SetupLogger(Path.ChangeExtension(outputFileName, ".log"));
 
             var watchFace = ReadWatchFaceConfig(inputFileName);
-            if (watchFace == null) return;
+
+            if (watchFace == null)
+            {
+                Logger.Fatal("道路千万条，安全第一条(ノ｀Д)ノ");
+                Logger.Fatal("打包不规范，用户两行泪___*( ￣皿￣)/#____");
+                Logger.Fatal("您可能导入了资源包json");
+                throw new Exception("似乎json不正确，请确保导入正确的json");
+            }
 
             var imagesDirectory = Path.GetDirectoryName(inputFileName);
             try
@@ -136,7 +143,7 @@ namespace WatchFace
 
             GeneratePreviews(reader.Parameters, reader.Images, outputDirectory, baseName);
 
-            Logger.Debug("Exporting resources to '{0}'", outputDirectory);
+            Logger.Debug("导出到 '{0}'", outputDirectory);
             var reDescriptor = new FileDescriptor {Resources = reader.Resources};
             new Extractor(reDescriptor).Extract(outputDirectory);
             ExportWatchFaceConfig(watchFace, Path.Combine(outputDirectory, $"{baseName}.json"));
@@ -169,7 +176,7 @@ namespace WatchFace
             else
             {
                 throw new ArgumentException(
-                    "File 'header.json' or 'version' should exists in the folder with unpacked images. Res-file couldn't be created"
+                    "'header.json' 或 'version' 必须在文件内！"
                 );
             }
 
@@ -184,7 +191,7 @@ namespace WatchFace
                 }
                 catch (FileNotFoundException)
                 {
-                    Logger.Info("All images with sequenced names are loaded. Latest loaded image: {0}", i - 1);
+                    Logger.Info("所有图片序列已装载， 最新装载: {0}", i - 1);
                     break;
                 }
 
@@ -193,7 +200,7 @@ namespace WatchFace
 
             if (resDescriptor.ResourcesCount != null && resDescriptor.ResourcesCount.Value != images.Count)
                 throw new ArgumentException(
-                    $"The .res-file should contain {resDescriptor.ResourcesCount.Value} images but was loaded {images.Count} images.");
+                    $"res应该包括 {resDescriptor.ResourcesCount.Value} 图像，但是你导入了 {images.Count} 图像");
 
             resDescriptor.Resources = images;
 
@@ -223,17 +230,17 @@ namespace WatchFace
         {
             try
             {
-                Logger.Debug("Reading referenced images from '{0}'", imagesDirectory);
+                Logger.Debug("从 '{0}' 读取参考图像", imagesDirectory);
                 var imagesReader = new ResourcesLoader(imagesDirectory);
                 imagesReader.Process(watchFace);
 
-                Logger.Trace("Building parameters for watch face...");
+                Logger.Trace("建构表盘参数...");
                 var descriptor = ParametersConverter.Build(watchFace);
 
                 var baseFilename = Path.GetFileNameWithoutExtension(outputFileName);
                 GeneratePreviews(descriptor, imagesReader.Images, outputDirectory, baseFilename);
 
-                Logger.Debug("Writing watch face to '{0}'", outputFileName);
+                Logger.Debug("写入表盘到： '{0}'", outputFileName);
                 using (var fileStream = File.OpenWrite(outputFileName))
                 {
                     var writer = new Writer(fileStream, imagesReader.Resources);
@@ -250,13 +257,13 @@ namespace WatchFace
 
         private static Reader ReadWatchFace(string inputFileName)
         {
-            Logger.Debug("Opening watch face '{0}'", inputFileName);
+            Logger.Debug("打开表盘 '{0}'", inputFileName);
             try
             {
                 using (var fileStream = File.OpenRead(inputFileName))
                 {
                     var reader = new Reader(fileStream);
-                    Logger.Debug("Reading parameters...");
+                    Logger.Debug("读取参数...");
                     reader.Read();
                     return reader;
                 }
@@ -270,7 +277,8 @@ namespace WatchFace
 
         private static Parser.WatchFace ParseResources(Reader reader)
         {
-            Logger.Debug("Parsing parameters...");
+            Logger.Debug("打包参数...");
+
             try
             {
                 return ParametersConverter.Parse<Parser.WatchFace>(reader.Parameters);
@@ -293,7 +301,7 @@ namespace WatchFace
 
         private static Parser.WatchFace ReadWatchFaceConfig(string jsonFileName)
         {
-            Logger.Debug("Reading config...");
+            Logger.Debug("读取配置...");
             try
             {
                 using (var fileStream = File.OpenRead(jsonFileName))
@@ -316,7 +324,7 @@ namespace WatchFace
 
         private static FileDescriptor ReadResConfig(string jsonFileName)
         {
-            Logger.Debug("Reading resources config...");
+            Logger.Debug("读取资源配置...");
             try
             {
                 using (var fileStream = File.OpenRead(jsonFileName))
@@ -339,7 +347,7 @@ namespace WatchFace
 
         private static void ExportWatchFaceConfig(Parser.WatchFace watchFace, string jsonFileName)
         {
-            Logger.Debug("Exporting config...");
+            Logger.Debug("导出配置...");
             try
             {
                 using (var fileStream = File.OpenWrite(jsonFileName))
@@ -358,7 +366,7 @@ namespace WatchFace
 
         private static void ExportResConfig(FileDescriptor resDescriptor, string jsonFileName)
         {
-            Logger.Debug("Exporting resources config...");
+            Logger.Debug("导出资源配置...");
             try
             {
                 using (var fileStream = File.OpenWrite(jsonFileName))
@@ -399,7 +407,7 @@ namespace WatchFace
 
         private static void GeneratePreviews(List<Parameter> parameters, Bitmap[] images, string outputDirectory, string baseName)
         {
-            Logger.Debug("Generating previews...");
+            Logger.Debug("生成预览...");
 
             var states = GetPreviewStates();
             var staticPreview = PreviewGenerator.CreateImage(parameters, images, new WatchState());

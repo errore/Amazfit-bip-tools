@@ -27,21 +27,22 @@ namespace Resources
             var offset = (uint) 0;
             for (var i = 0; i < resources.Count; i++)
             {
-                Logger.Trace("Resource {0} offset is {1}...", i, offset);
+                Logger.Trace("资源 {0} 偏移为 {1}...", i, offset);
                 var offsetBytes = BitConverter.GetBytes(offset);
                 offsetBytes.CopyTo(offsetsTable, i * OffsetTableItemLength);
 
                 var encodedImage = new MemoryStream();
-                Logger.Debug("Encoding resource {0}...", i);
+                Logger.Debug("解码资源 {0}...", i);
                 resources[i].WriteTo(encodedImage);
                 offset += (uint) encodedImage.Length;
                 encodedResources[i] = encodedImage;
             }
 
-            Logger.Trace("Writing resources offsets table");
+            Logger.Trace("写入偏移表");
             _stream.Write(offsetsTable, 0, offsetsTable.Length);
-
-            Logger.Debug("Writing resources");
+            Logger.Debug("==========================");
+            Logger.Debug("写入资源包");
+            Logger.Debug("大功告成！！！恭喜！！！(￣▽￣)╭ Ohohoho.....");
             foreach (var encodedImage in encodedResources)
             {
                 encodedImage.Seek(0, SeekOrigin.Begin);

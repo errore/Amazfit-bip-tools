@@ -18,11 +18,11 @@ namespace WatchFace.Parser.Utils
                     .GetCustomAttributes(typeof(ParameterIdAttribute), false).FirstOrDefault();
                 if (parameterIdAttribute == null)
                     throw new ArgumentException(
-                        $"Class {typeInfo.Name} doesn't have ParameterIdAttribute on property {propertyInfo.Name}"
+                        $"类 {typeInfo.Name} 没有正确的ParameterIdAttribute {propertyInfo.Name}"
                     );
                 if (properties.ContainsKey(parameterIdAttribute.Id))
                     throw new ArgumentException(
-                        $"Class {typeInfo.Name} already has ParameterIdAttribute with Id {parameterIdAttribute.Id}"
+                        $"类 {typeInfo.Name} 已经存在ParameterIdAttribute Id为 {parameterIdAttribute.Id}"
                     );
 
                 properties[parameterIdAttribute.Id] = propertyInfo;
